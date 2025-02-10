@@ -85,11 +85,16 @@ public class Converter {
 
         try {
 
+<<<<<<< HEAD
             // CREATE JSON ARRAYS TO HOLD SEPARATE DATA CATEGORIES
+=======
+            // INSERT YOUR CODE HERE
+>>>>>>> d38fc93ac2adb30edff7613cd35e2a477d58e142
             JsonArray jsonProdNum = new JsonArray();  // Stores the "ProdNum" values separately
             JsonArray jsonColHeadings = new JsonArray();  // Stores column headings
             JsonArray jsonData = new JsonArray();  // Stores the main data as nested arrays
             
+<<<<<<< HEAD
             // USE A LINKED HASHMAP TO MAINTAIN ORDER OF INSERTION OF KEY-VALUE PAIRS
             LinkedHashMap<String, JsonArray> jsonRecord = new LinkedHashMap<>();
             
@@ -107,6 +112,25 @@ public class Converter {
             jsonColHeadings.addAll(Arrays.asList(csvHeadings));
             
             // PROCESS DATA LINES AND ADD TO JSON ARRAYS
+=======
+            // Using LinkedHashMap instead of JsonObject to maintain key insertion order
+            LinkedHashMap<String, JsonArray> jsonRecord = new LinkedHashMap<>();
+            
+            // Reading csvString and putting it in a list
+            CSVReader reader = new CSVReader(new StringReader(csvString));
+            
+            // Reads all lines from CSV into a list
+            List<String[]> csvList = reader.readAll(); 
+            
+            // Iterating the list
+            Iterator<String[]> iterator = csvList.iterator();
+            
+            // Isolating header line and adding it to JsonArray
+            String[] csvHeadings = iterator.next();
+            jsonColHeadings.addAll(Arrays.asList(csvHeadings));
+            
+            // Main loop - putting rest of data in appropriate JsonArrays
+>>>>>>> d38fc93ac2adb30edff7613cd35e2a477d58e142
             while(iterator.hasNext()){
                 JsonArray csvData = new JsonArray();
                 String[] csvRecords = iterator.next();
@@ -123,12 +147,20 @@ public class Converter {
                 }
                 jsonData.add(csvData);
             }
+<<<<<<< HEAD
             // FILL THE JSON OBJECT WITH THE JSON ARRAYS
+=======
+            // Filling JsonObject with the JsonArrays
+>>>>>>> d38fc93ac2adb30edff7613cd35e2a477d58e142
             jsonRecord.put("ProdNums", jsonProdNum);
             jsonRecord.put("ColHeadings", jsonColHeadings);
             jsonRecord.put("Data", jsonData);
             
+<<<<<<< HEAD
             // SERIALIZE JSON OBJECT TO A STRING
+=======
+            // Serializing JsonObject to a string
+>>>>>>> d38fc93ac2adb30edff7613cd35e2a477d58e142
             String jsonString = Jsoner.serialize(jsonRecord);
             
             return jsonString;
@@ -149,6 +181,7 @@ public class Converter {
 
         try {
 
+<<<<<<< HEAD
             // PARSE THE JSON STRING TO GET A JSON OBJECT
             JsonObject json = Jsoner.deserialize(jsonString, new JsonObject());
             
@@ -164,11 +197,30 @@ public class Converter {
             /*  HANDLE COLUMN HEADINGS */
             
             // CONVERT THE JSON COLUMN HEADERS INTO A LIST
+=======
+            // INSERT YOUR CODE HERE
+            JsonObject json = Jsoner.deserialize(jsonString, new JsonObject());
+            
+            // Variable initialization
+            // extract key JSON arrays from the JsonObject
+            JsonArray prodnums = (JsonArray) json.get("ProdNums");
+            JsonArray colHeadings = (JsonArray) json.get("ColHeadings");
+            JsonArray data = (JsonArray) json.get("Data");
+            
+            // StringWriter and CSVWriter to write a csv string
+            StringWriter writer = new StringWriter();
+            CSVWriter csvWriter = new CSVWriter(writer, ',', '"', '\\', "\n");
+            
+            /*  COL HEADINGS */ 
+            
+            // convert the JSON column headers into a List<String>
+>>>>>>> d38fc93ac2adb30edff7613cd35e2a477d58e142
             List<String> csvColHeadingsList = new ArrayList<>();
             for (int i = 0; i < colHeadings.size(); i++) {
                 csvColHeadingsList.add(colHeadings.getString(i));
             }
             
+<<<<<<< HEAD
             // CONVERT THE LIST TO A STRING ARRAY AND WRITE THE HEADER ROW TO CSV
             int colHeadingsSize = csvColHeadingsList.size();
             String[] csvColHeadings = csvColHeadingsList.toArray(new String[colHeadingsSize]);
@@ -183,10 +235,30 @@ public class Converter {
             COMBINE THE PRODNUM AND DATA JSON ARRAYS, AND WRITE TO CSV
             */
             for (int i = 0; i < prodnums.size(); i++) {
+=======
+            // converting List<String> to String[] and writing the array with csvWriter
+            int colHeadingsSize = csvColHeadingsList.size();
+            String[] csvColHeadings = csvColHeadingsList.toArray(new String[colHeadingsSize]);
+            csvWriter.writeNext(csvColHeadings);  // write the column headers
+            
+            /*----- HANDLING REMAINING DATA-- */
+            
+            // removing "ProdNum" from colHeadings since ProdNum is separated from rest of data
+            colHeadings.remove("ProdNum");
+            
+            /* 
+            combining prodnum and data JsonArrays into List<String> and converting
+            the List into a string array one line at a time, then writing that line
+            with csvWriter.
+            */
+            for (int i = 0; i < prodnums.size(); i++) {
+                // Putting all contents of prodnums JsonArray into List<String>
+>>>>>>> d38fc93ac2adb30edff7613cd35e2a477d58e142
                 List<String> csvData = (List<String>) data.get(i);
                 List<String> csvRecordList = new ArrayList<>();
                 csvRecordList.add(prodnums.getString(i));
                 
+<<<<<<< HEAD
                 for(int j = 0; j < csvData.size(); j++){
                     /* 
                     CHECK IF THE COLUMN IS "Season" OR "Episode" (WHICH ARE INTEGERS IN JSON)
@@ -197,6 +269,23 @@ public class Converter {
                     }
                     else if (colHeadings.get(j).equals("Episode")){
                         // CONVERT INTEGER TO A 2-DIGIT STRING (E.G., 1 -> "01") FOR CSV FORMAT
+=======
+                
+                for(int j = 0; j < csvData.size(); j++){
+                    /* 
+                     check if the column is "Season" or "Episode" (which are stored as integers in JSON)
+                    */
+                    
+                    if (colHeadings.get(j).equals("Season")){
+                        /*
+                        convert integer to string and add to the row
+                        */
+                        csvRecordList.add(String.valueOf(csvData.get(j)));
+                    }
+                    else if (colHeadings.get(j).equals("Episode")){
+                        
+                        // convert integer to a 2-digit string (like, 1 -> "01") for CSV formatting
+>>>>>>> d38fc93ac2adb30edff7613cd35e2a477d58e142
                         Integer num = Integer.valueOf(String.valueOf(csvData.get(j)));
                         String numString = String.format("%02d", num);
                         csvRecordList.add(numString);
@@ -206,12 +295,19 @@ public class Converter {
                     }
                 }
                 
+<<<<<<< HEAD
                 // CONVERT THE LIST TO A STRING ARRAY AND WRITE THE ROW TO CSV
+=======
+                // convert the list to a string array and write the row to CSV
+>>>>>>> d38fc93ac2adb30edff7613cd35e2a477d58e142
                 String[] csvRecord = csvRecordList.toArray(new String[colHeadingsSize]);
                 csvWriter.writeNext(csvRecord);   
             }
             
+<<<<<<< HEAD
             // RETURN THE FINAL CSV STRING
+=======
+>>>>>>> d38fc93ac2adb30edff7613cd35e2a477d58e142
             String csvString = writer.toString();
 
             return csvString.trim();  
@@ -224,4 +320,8 @@ public class Converter {
 
     }
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> d38fc93ac2adb30edff7613cd35e2a477d58e142
